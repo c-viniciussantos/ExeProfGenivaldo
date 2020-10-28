@@ -1,22 +1,17 @@
 package entidades;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
+import java.sql.Connection;
 import java.util.Date;
-import java.util.List;
+import java.sql.PreparedStatement;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
-import com.sun.javafx.binding.StringFormatter;
+import db.DB;
 
 public class ContaLuz {
 	
+	SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	Scanner sc = new Scanner(System.in);
-	SimpleDateFormat sdf1 = new SimpleDateFormat("dd/MM/yyyy");
-	SimpleDateFormat sdf2 = new SimpleDateFormat("dd/MM/yyyy");
-	
-	List<String> list = new ArrayList<String>();
-	
 
 	private Date dataLeitura;
 	private Integer numeroLeitura;
@@ -28,8 +23,8 @@ public class ContaLuz {
 	public ContaLuz() {
 	}
 
-	public ContaLuz(Date dataLeitura, Integer numeroLeitura, Integer qtdKwGasto, Double valorPagar,
-			Date dataPagamento, Double mediaConsumo) {
+	public ContaLuz(Date dataLeitura, Integer numeroLeitura, Integer qtdKwGasto, Double valorPagar, Date dataPagamento,
+			Double mediaConsumo) {
 		super();
 		this.dataLeitura = dataLeitura;
 		this.numeroLeitura = numeroLeitura;
@@ -43,7 +38,7 @@ public class ContaLuz {
 		return dataLeitura;
 	}
 
-	public void setDaLeitura(Date dataLeitura) {
+	public String setDaLeitura(Date dataLeitura) {
 		this.dataLeitura = dataLeitura;
 	}
 
@@ -86,64 +81,74 @@ public class ContaLuz {
 	public void setMediaConsumo(Double mediaConsumo) {
 		this.mediaConsumo = mediaConsumo;
 	}
-
-	public void cadastrarConta() {
-		System.out.print("Quantas contas quer cadastrar?: ");
-		int op = sc.nextInt();
-
-		for (int i = 1; i <= op; i++) {
-			System.out.print("Informe a data da leitura: (DD/MM/YYYY): ");
-			try {
-				dataLeitura = sdf1.parse(sc.next());
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-			list.add(String.format("Data de leitura: ", getDataLeitura()));
-			
-			System.out.println();
-			System.out.print("Informe o numero da leitura: ");
-			numeroLeitura = sc.nextInt();
-			list.add(String.format("Numero de leitura", getNumeroLeitura()));
-			
-			System.out.println();
-			System.out.print("Informe o Kw gasto: ");
-			qtdKwGasto = sc.nextInt();
-			list.add(String.format("Quantidade Kw Gasto", getQtdKwGasto()));
-			
-			System.out.println();
-			System.out.print("Informe o valor a pagar: R$");
-			valorPagar = sc.nextDouble();
-			list.add(String.format("Valor a pagar R$", getValorPagar()));
-			
-			System.out.println();
-			System.out.print("Digite a data de pagamento (DD/MM/YYYY): ");
-			try {
-				dataPagamento = sdf2.parse(sc.next());
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-			list.add(String.format("Data de pagamento: ", getDataPagamento()));
-			
-			System.out.println();
-			System.out.println("Processando " + i + " novas contas...");
-		}
-
-		System.out.println();
-		System.out.println("Contas cadastradas com sucesso!!!");
-		System.out.println("Voltando para o menu...");
-		
-		
-	}
-
-	public Date verificaMesMenorConsumo() {
-		return null;
-	}
-
-	public Date varificaMesMaiorConsumo() {
-		return null;
-	}
 	
-	public void mediaConsumo() {
+	Connection conn = null;
+	PreparedStatement st = null;
+	
+	try {
+		conn = DB.getConnection();
+		
+		st = conn.prepareStatement( "INSERT INTO conta_de_luz "
+				+" (dataLeitura, numLeitura, kwGasto, valorPagamento, dataPagamento, media consumo) "
+				+" VALUES "
+				+"(?, ?, ?, ?, ?)");
+		
+		st.setDate(1, new java.sql.Date(sdf.parse(setDaLeitura(dataLeitura)).getTime()));
+		
+		
+			} catch() { 
+				
+			}
+	}
+}
+		
+
+		public void cadastrarConta() {
+			System.out.print("Quantas contas quer cadastrar?: ");
+			int op = sc.nextInt();
+	
+			for (int i = 1; i <= op; i++) {
+				System.out.print("Informe a data da leitura: (DD/MM/YYYY): ");
+				rs = st.executeQuery(sql)
+				System.out.println();
+				System.out.print("Informe o numero da leitura: ");
+				numeroLeitura = sc.nextInt();
+	
+				System.out.println();
+				System.out.print("Informe o Kw gasto: ");
+				qtdKwGasto = sc.nextInt();
+	
+				System.out.println();
+				System.out.print("Informe o valor a pagar: R$");
+				valorPagar = sc.nextDouble();
+	
+				System.out.println();
+				System.out.print("Digite a data de pagamento (DD/MM/YYYY): ");
+	
+				System.out.println();
+				System.out.println("Processando " + i + " novas contas...");
+			}
+	
+			System.out.println();
+			System.out.println("Contas cadastradas com sucesso!!!");
+			System.out.println("Voltando para o menu...");
+	
+		}
+	
+		public Date verificaMesMenorConsumo() {
+			return null;
+		}
+	
+		public Date varificaMesMaiorConsumo() {
+			return null;
+		}
+	
+		public void mediaConsumo() {
+	
+		}
+	} 
+	
+	catch() {
 		
 	}
 
