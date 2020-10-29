@@ -1,13 +1,19 @@
 package aplicacao;
 
-import java.sql.Connection;
+import java.text.ParseException;
 
-import db.DB;
+import entidades.Menus;
 
 public class Programa {
 
 	public static void main(String[] args) {
 		
+		Menus menu = new Menus();
 		
+		try {
+			menu.menuInicio();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 }

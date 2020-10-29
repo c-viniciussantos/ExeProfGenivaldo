@@ -1,44 +1,47 @@
 package entidades;
 
+import java.io.Serializable;
 import java.sql.Connection;
-import java.util.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 import db.DB;
+import db.DbException;
 
-public class ContaLuz {
-	
+public class ContaLuz implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 	Scanner sc = new Scanner(System.in);
 
-	private Date dataLeitura;
+	private String dataLeitura;
 	private Integer numeroLeitura;
 	private Integer qtdKwGasto;
 	private Double valorPagar;
-	private Date dataPagamento;
-	private Double mediaConsumo;
+	private String dataPagamento;
 
 	public ContaLuz() {
 	}
 
-	public ContaLuz(Date dataLeitura, Integer numeroLeitura, Integer qtdKwGasto, Double valorPagar, Date dataPagamento,
-			Double mediaConsumo) {
+	public ContaLuz(String dataLeitura, Integer numeroLeitura, Integer qtdKwGasto, Double valorPagar,
+			String dataPagamento) {
 		super();
 		this.dataLeitura = dataLeitura;
 		this.numeroLeitura = numeroLeitura;
 		this.qtdKwGasto = qtdKwGasto;
 		this.valorPagar = valorPagar;
 		this.dataPagamento = dataPagamento;
-		this.mediaConsumo = mediaConsumo;
 	}
 
-	public Date getDataLeitura() {
+	public String getDataLeitura() {
 		return dataLeitura;
 	}
 
-	public String setDaLeitura(Date dataLeitura) {
+	public void setDataLeitura(String dataLeitura) {
 		this.dataLeitura = dataLeitura;
 	}
 
@@ -66,90 +69,102 @@ public class ContaLuz {
 		this.valorPagar = valorPagar;
 	}
 
-	public Date getDataPagamento() {
+	public String getDataPagamento() {
 		return dataPagamento;
 	}
 
-	public void setDataPagamento(Date dataPagamento) {
+	public void setDataPagamento(String dataPagamento) {
 		this.dataPagamento = dataPagamento;
 	}
 
-	public Double getMediaConsumo() {
-		return mediaConsumo;
-	}
+	public void insert() {
+		Connection conn = null;
+		PreparedStatement st = null;
 
-	public void setMediaConsumo(Double mediaConsumo) {
-		this.mediaConsumo = mediaConsumo;
-	}
-	
-	Connection conn = null;
-	PreparedStatement st = null;
-	
-	try {
-		conn = DB.getConnection();
-		
-		st = conn.prepareStatement( "INSERT INTO conta_de_luz "
-				+" (dataLeitura, numLeitura, kwGasto, valorPagamento, dataPagamento, media consumo) "
-				+" VALUES "
-				+"(?, ?, ?, ?, ?)");
-		
-		st.setDate(1, new java.sql.Date(sdf.parse(setDaLeitura(dataLeitura)).getTime()));
-		
-		
-			} catch() { 
-				
+		try {
+			conn = DB.getConnection();
+
+			st = conn.prepareStatement(
+					"INSERT INTO conta_de_luz " + " (dataLeitura, numLeitura, kwGasto, valorPagamento, dataPagamento) "
+							+ " VALUES " + "(?, ?, ?, ?, ?)",
+					+Statement.RETURN_GENERATED_KEYS);
+
+			st.setString(1, getDataLeitura());
+			st.setInt(2, getNumeroLeitura());
+			st.setInt(3, getQtdKwGasto());
+			st.setDouble(4, getValorPagar());
+			st.setString(5, getDataPagamento());
+
+			int linhasAfetadas = st.executeUpdate();
+
+			if (linhasAfetadas > 0) {
+				System.out.println();
+				System.out.println("Sucesso!! Linhas afetadas: " + linhasAfetadas);
+
+			} else {
+				System.out.println();
+				throw new DbException("Erro inesperado!, nenhuma linha afetada!");
 			}
-	}
-}
-		
 
-		public void cadastrarConta() {
-			System.out.print("Quantas contas quer cadastrar?: ");
-			int op = sc.nextInt();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DB.closeStatement(st);
+			DB.closeConnection();
+		}
+	}
 	
-			for (int i = 1; i <= op; i++) {
-				System.out.print("Informe a data da leitura: (DD/MM/YYYY): ");
-				rs = st.executeQuery(sql)
-				System.out.println();
-				System.out.print("Informe o numero da leitura: ");
-				numeroLeitura = sc.nextInt();
-	
-				System.out.println();
-				System.out.print("Informe o Kw gasto: ");
-				qtdKwGasto = sc.nextInt();
-	
-				System.out.println();
-				System.out.print("Informe o valor a pagar: R$");
-				valorPagar = sc.nextDouble();
-	
-				System.out.println();
-				System.out.print("Digite a data de pagamento (DD/MM/YYYY): ");
-	
-				System.out.println();
-				System.out.println("Processando " + i + " novas contas...");
+	public void select() {
+		Connection conn = null;
+		Statement st = null;
+		ResultSet rs = null;
+
+		try {
+			conn = DB.getConnection();
+			st = conn.createStatement();
+			rs = st.executeQuery("SELECT * FROM conta_de_luz;");
+			
+			while(rs.next()) {
+				System.out.println(rs.getInt("idConta") + ", "
+						+ rs.getString("dataLeitura")+ ", "
+						+ rs.getInt("numLeitura")+ ", "
+						+ rs.getInt("kwGasto")+ ", "
+						+ rs.getDouble("valorPagamento")+ ", "
+						+ rs.getString("dataPagamento"));
 			}
-	
-			System.out.println();
-			System.out.println("Contas cadastradas com sucesso!!!");
-			System.out.println("Voltando para o menu...");
-	
+			
+		} catch(SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatement(st);
+			DB.closeConnection();
 		}
-	
-		public Date verificaMesMenorConsumo() {
-			return null;
-		}
-	
-		public Date varificaMesMaiorConsumo() {
-			return null;
-		}
-	
-		public void mediaConsumo() {
-	
-		}
-	} 
-	
-	catch() {
-		
 	}
 
+	public void cadastrarConta() {
+
+		System.out.print("Informe a data da leitura(DD/MM/YYYY): ");
+		setDataLeitura(sc.nextLine());
+		System.out.println();
+		System.out.print("Informe o numero da leitura: ");
+		setNumeroLeitura(sc.nextInt());
+
+		System.out.println();
+		System.out.print("Informe a quantidade de Kw gasto: ");
+		setQtdKwGasto(sc.nextInt());
+
+		System.out.println();
+		System.out.print("Informe o valor a pagar: R$");
+		setValorPagar(sc.nextDouble());
+		sc.nextLine();
+		System.out.println();
+		System.out.print("Informe a data de pagamento: (DD/MM/YYYY)");
+		setDataPagamento(sc.nextLine());
+		
+		System.out.println();
+		System.out.println("Cadastrando dados no banco de dados...");
+		System.out.println();
+		insert();
+	}
 }
